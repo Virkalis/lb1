@@ -1,0 +1,207 @@
+@startuml
+class org.swe.figures.Tools.ToolFactory {
+- GraphicsContext gc
+- IShapeFactory shapeFactory
++ DrawTool createTool(String,Color,double,boolean,Consumer<Shape>,Runnable)
+}
+
+
+class org.swe.figures.Model.Circle {
++ double radius
++ boolean fill
++ double area()
++ void draw(GraphicsContext)
+}
+
+
+class org.swe.figures.View.CanvasState {
+- {static} long serialVersionUID
+- List<SerializableShape> shapes
+- String currentColorString
+- double currentLineWidth
+- boolean currentFillState
++ List<SerializableShape> getShapes()
++ Color getCurrentColor()
++ double getCurrentLineWidth()
++ boolean getCurrentFillState()
+}
+
+
+class org.swe.figures.Model.Rectangle {
++ double width
++ boolean fill
++ double area()
++ void draw(GraphicsContext)
+}
+
+
+class org.swe.figures.Tools.TriangleTool {
+# int requiredPoints()
+}
+
+class org.swe.figures.View.CanvasOriginator {
+- List<Shape> shapes
+- Color currentColor
+- double currentLineWidth
+- boolean currentFillState
+- IShapeFactory shapeFactory
+- ColorPicker colorPicker
+- Slider lineWidthSlider
+- CheckBox fillCheckBox
++ void setShapes(List<Shape>)
++ List<Shape> getShapes()
++ CanvasState saveState()
++ void restoreState(CanvasState)
++ void saveToFile(String)
++ void loadFromFile(String)
+}
+
+
+class org.swe.figures.Model.Triangle {
++ double[] xPoints
++ double[] yPoints
++ boolean fill
++ double area()
++ void draw(GraphicsContext)
+}
+
+
+class org.swe.figures.Tools.FreeDrawTool {
+- GraphicsContext gc
+- Color color
+- double lineWidth
+- boolean fill
++ void onMousePressed(MouseEvent)
++ void onMouseDragged(MouseEvent)
++ void onMouseReleased(MouseEvent)
++ void onMouseClicked(MouseEvent)
++ void drawHelperPoints()
+}
+
+
+abstract class org.swe.figures.Tools.ShapeTool {
+# GraphicsContext gc
+# List<Double> points
+# Consumer<Shape> onShapeReady
+# IShapeFactory shapeFactory
+# String shapeType
+# Runnable onCanvasRedrawNeeded
+# Color color
+# double lineWidth
+# boolean fill
+# {abstract}int requiredPoints()
++ void onMouseClicked(MouseEvent)
++ void onMousePressed(MouseEvent)
++ void onMouseDragged(MouseEvent)
++ void onMouseReleased(MouseEvent)
++ void drawHelperPoints()
+}
+
+
+abstract class org.swe.figures.Model.Shape {
+# Color color
+# double lineWidth
+# String name
+# double startX
+# double startY
++ {abstract}double area()
++ {abstract}void draw(GraphicsContext)
++ String getName()
++ double getStartX()
++ double getStartY()
++ Color getColor()
++ double getLineWidth()
+}
+
+
+interface org.swe.figures.Tools.IToolFactory {
+~ DrawTool createTool(String,Color,double,boolean,Consumer<Shape>,Runnable)
+}
+
+interface org.swe.figures.Tools.DrawTool {
+~ void onMousePressed(MouseEvent)
+~ void onMouseDragged(MouseEvent)
+~ void onMouseReleased(MouseEvent)
+~ void onMouseClicked(MouseEvent)
+~ void drawHelperPoints()
+}
+
+class org.swe.figures.Controller {
+- Canvas canvas
+- ColorPicker colorPicker
+- CheckBox fillCheckBox
+- Slider lineWidthSlider
+- ComboBox<String> modeComboBox
+- GraphicsContext gc
+- IToolFactory toolFactory
+- IShapeFactory sf
+- DrawTool currentTool
+- List<Shape> shapes
+- Shape[] shapesForInit
+- CanvasOriginator originator
++ void initialize()
+- void clear()
+- void updateTool()
++ void undo(ActionEvent)
++ void saveCanvas(ActionEvent)
++ void loadCanvas(ActionEvent)
+- void redrawCanvas()
+- void showAlert(String,String)
+}
+
+
+class org.swe.figures.Tools.CircleTool {
+# int requiredPoints()
+}
+
+class org.swe.figures.View.SerializableShape {
+- {static} long serialVersionUID
+- String shapeType
+- String colorString
+- double lineWidth
+- boolean fill
+- double[] parameters
++ {static} SerializableShape fromShape(Shape)
++ Shape toShape(IShapeFactory)
++ String getShapeType()
+}
+
+
+class org.swe.figures.Tools.RectangleTool {
+# int requiredPoints()
+}
+
+interface org.swe.figures.Model.IShapeFactory {
+~ Shape[] createAllShapes()
+~ Shape createShape(String,Color,double,boolean,double[])
+}
+
+class org.swe.figures.Model.ShapeFactory {
++ Shape[] createAllShapes()
++ Shape createShape(String,Color,double,boolean,double[])
+- Circle createCircle(Color,double,double[],boolean)
+- Rectangle createRectangle(Color,double,double[],boolean)
+- Triangle createTriangle(Color,double,double[],boolean)
+}
+
+class org.swe.figures.Main {
++ void start(Stage)
++ {static} void main(String[])
+}
+
+
+
+org.swe.figures.Tools.IToolFactory <|.. org.swe.figures.Tools.ToolFactory
+org.swe.figures.Model.Shape <|-- org.swe.figures.Model.Circle
+java.io.Serializable <|.. org.swe.figures.View.CanvasState
+org.swe.figures.Model.Shape <|-- org.swe.figures.Model.Rectangle
+org.swe.figures.Tools.ShapeTool <|-- org.swe.figures.Tools.TriangleTool
+org.swe.figures.Model.Shape <|-- org.swe.figures.Model.Triangle
+org.swe.figures.Tools.DrawTool <|.. org.swe.figures.Tools.FreeDrawTool
+org.swe.figures.Tools.DrawTool <|.. org.swe.figures.Tools.ShapeTool
+org.swe.figures.Tools.ShapeTool <|-- org.swe.figures.Tools.CircleTool
+java.io.Serializable <|.. org.swe.figures.View.SerializableShape
+org.swe.figures.Tools.ShapeTool <|-- org.swe.figures.Tools.RectangleTool
+org.swe.figures.Model.IShapeFactory <|.. org.swe.figures.Model.ShapeFactory
+javafx.application.Application <|-- org.swe.figures.Main
+@enduml
